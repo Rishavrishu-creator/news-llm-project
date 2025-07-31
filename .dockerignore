@@ -1,0 +1,57 @@
+# Maven files and directories
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+# .mvn/wrapper/maven-wrapper.jar
+# .mvn/wrapper/maven-wrapper.properties
+.mvn/wrapper/MavenWrapperDownloader.java
+
+# Compiled source & backup files
+**/*.class
+**/*.bak
+**/*.log
+
+# Various IDE configs
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.vscode
+*.sublime-workspace
+*.sublime-project
+
+# Package files
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# OS files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Logs and databases
+*.log
+*.sql
+*.jks
+hs_err_pid*
+
+# Skip Git and other VCS directories and files
+.git
+.gitignore
+.svn/
+CVS/
+
+
+.DS_Store

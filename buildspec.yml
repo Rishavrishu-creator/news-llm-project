@@ -1,0 +1,47 @@
+version: 0.2
+
+artifacts:
+  files:
+    - imagedefinitions.json
+
+env:
+  variables:
+    IMAGE_REPO_NAME: "stx-payment-platform-rc-api"
+ 
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws --version
+      - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+      - echo $AWS_ACCOUNT_ID $AWS_REGION
+      - echo $(aws ecr get-login-password --region $AWS_REGION) | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+      - REPOSITORY_URI=$(aws ecr describe-repositories --repository-names $IMAGE_REPO_NAME --query 'repositories[0].repositoryUri' --output text)
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - IMAGE_TAG=${COMMIT_HASH:-latest}
+
+  build:
+    commands:
+      - echo Generating .env from .env.example and AWS Parameter Store...
+      - grep -v -E '^$|^#' .env.example | while IFS= read -r line; do KEY_NAME=$(echo $line | awk -F'=' '{print $1}') && [[ -n $KEY_NAME ]] && echo "$KEY_NAME=$(aws ssm get-parameter --name "/$IMAGE_REPO_NAME/$KEY_NAME" --query "Parameter.Value" --output text)" >> .env; done
+      - echo Printing .env variables
+      - cat .env
+      - echo Build started on `date`
+      - echo Building the Docker image...
+      - docker build -t $REPOSITORY_URI:$IMAGE_TAG .
+      - echo Tagging the Docker image as latest...
+      - docker tag $REPOSITORY_URI:$IMAGE_TAG $REPOSITORY_URI:latest
+      - echo Build completed on `date`
+      - echo Pushing the Docker images...
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - docker push $REPOSITORY_URI:latest
+
+
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Writing image definitions file...
+      - printf '[{"name":"%s","imageUri":"%s"}]' $IMAGE_REPO_NAME $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+      - cat imagedefinitions.json
+
+
