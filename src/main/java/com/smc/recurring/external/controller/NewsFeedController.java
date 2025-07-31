@@ -27,8 +27,8 @@ public class NewsFeedController {
 
     //Testing the domain (though health endpoint can also working)
     @GetMapping(value = "/rishav")
-    public String getAllData(@RequestParam(name = "customerId", required = true) String customerId) {
-        return "Hello from Rishav - " + customerId;
+    public String getAllData() {
+        return "Hello, How are you doing today? This domain is working absolutely fine";
     }
 
     //API to upload the file which was given to my cloud managed Postgres Database
